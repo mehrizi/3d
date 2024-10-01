@@ -1,25 +1,29 @@
 import * as THREE from 'three';
-import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
-import { GLTFLoader } from 'three/examples/jsm/Addons.js'
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 
-export class Animator {
+export class Keyboard {
+    line = 0
+    texts = ['']
+    objects = []
+    lineHeight = .28
+    constructor(scene) {
+        this.scene = scene;
+    }
     static textDefaultColor = 0xdddddd
 
-    // static getInstance() {
-    //     if (!Animator.instance) {
-    //         Animator.instance = new Animator()
-    //     }
-    //     return Animator.instance
-    // }
-
-    static createKey(char, char2, keyWidth = .6, keyHeight = .6) {
+    static extrudeSettings = {
+        steps: 1,
+        depth: 0.2,
+        bevelEnabled: false
+    };
+    createKey(char, char2, keyWidth = .6, keyHeight = .6) {
         const returnKey = {
             group: null,
             text: null,
             shape: null,
             keyMesh: null,
+            keyShape: null,
             textMesh: null,
             textMaterial: null
         }
@@ -27,13 +31,12 @@ export class Animator {
         const keyGroup = new THREE.Group();
 
         // Key dimensions
-        // const keyWidth = 0.6;
-        // const keyHeight = 0.6;
         const keyDepth = 0.2;
         const cornerRadius = keyHeight * 0.1;
 
         // Create rounded rectangle shape
         const shape = new THREE.Shape();
+        returnKey.keyShape = shape;
         shape.moveTo(cornerRadius, 0);
 
         shape.lineTo(keyWidth - cornerRadius, 0);
@@ -49,15 +52,11 @@ export class Animator {
         shape.lineTo(0, cornerRadius);
         shape.quadraticCurveTo(0, 0, cornerRadius, 0);
 
-        // Create extrude settings
-        const extrudeSettings = {
-            steps: 1,
-            depth: keyDepth,
-            bevelEnabled: false
-        };
 
         // Create key geometry
-        const keyGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        const keyGeometry = new THREE.ExtrudeGeometry(shape, Keyboard.extrudeSettings);
+        returnKey.keyGeometry = keyGeometry
+        //  keyGeometry.s
 
         // Create key material
         const keyMaterial = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: .2 });
@@ -71,21 +70,18 @@ export class Animator {
         returnKey.shape = shape;
 
         // Create text for the key
-        // let 
-        // returnKey.textMesh = textMesh1;
-        // returnKey.textMaterial = textMaterial;
-        // 
         const loader = new FontLoader();
+        const self = this;
         loader.load('models/roboto.json', function (font) {
             const textGeometry1 = new TextGeometry(char, {
                 font: font,
                 size: 0.2,
-                height: 0.03,
+                depth: 0.03,
                 curveSegments: 12,
                 bevelEnabled: false
             });
 
-            const textMaterial = new THREE.MeshPhongMaterial({ color: Animator.textDefaultColor });
+            const textMaterial = new THREE.MeshPhongMaterial({ color: Keyboard.textDefaultColor });
             // textMaterial.setValues
             const textMesh1 = new THREE.Mesh(textGeometry1, textMaterial);
 
@@ -117,13 +113,13 @@ export class Animator {
     }
 
 
-    static keyboardKeys = []
-    static createKeyboard() {
+    keyboardKeys = []
+    create() {
+
         const keyboard = new THREE.Group();
 
         const keyWidth = 0.6;
         const keyHeight = 0.6;
-        const keyDepth = 0.2;
         const keyMargin = 0.1;
         const rowMargin = 0.2;
 
@@ -146,7 +142,7 @@ export class Animator {
             ],
             // Row 3
             [
-                { char: 'Caps Lock', width: 1.75 },
+                { char: 'Caps Lock', width: 2 },
                 { char: 'A', width: 1 }, { char: 'S', width: 1 }, { char: 'D', width: 1 }, { char: 'F', width: 1 },
                 { char: 'G', width: 1 }, { char: 'H', width: 1 }, { char: 'J', width: 1 }, { char: 'K', width: 1 },
                 { char: 'L', width: 1 }, { char: ';', width: 1 }, { char: "'", width: 1 },
@@ -173,6 +169,7 @@ export class Animator {
             ]
         ];
 
+        const self  = this;
         layout.forEach((row, rowIndex) => {
             let xOffset = -5;
             row.forEach(keyInfo => {
@@ -185,22 +182,31 @@ export class Animator {
                     rowIndex * (keyHeight + rowMargin)
                 );
                 keyboard.add(rKey.group);
-                this.keyboardKeys.push({ char: keyInfo.char, objects: rKey });
+                self.keyboardKeys.push({ char: keyInfo.char, objects: rKey });
                 xOffset += keyWidthWithMargin;
             });
         });
-
-        return keyboard;
+        keyboard.position.z += 5;
+        this.scene.add(keyboard);
     }
 
-    static pressKey(char) {
-        // console.log(this.keyboardKeys);
+    keyDown(char) {
         const xxx = this.keyboardKeys.forEach(k => {
             if (k.char === char) {
                 k.objects.textMaterial.setValues({ color: 0x00ff00 })
-                setTimeout(() => {
-                    k.objects.textMaterial.setValues({ color: this.textDefaultColor })
-                }, 200);
+                k.objects.group.scale.set(1, .8, 1);
+
+            }
+        });
+
+        // .key.material.color.setHex(0xff0000);
+    }
+    keyUp(char) {
+        const xxx = this.keyboardKeys.forEach(k => {
+            if (k.char === char) {
+                k.objects.group.scale.set(1, 1, 1);
+                k.objects.textMaterial.setValues({ color: Keyboard.textDefaultColor })
+                // }, 200);
 
             }
         });
@@ -208,31 +214,4 @@ export class Animator {
         // .key.material.color.setHex(0xff0000);
     }
 
-    static loadMonitor(scene) {
-        const loader = new GLTFLoader();
-        loader.load('./models/monitor.glb', function (gltf) {
-            console.log(gltf);
-            // gltf.setSize(100)
-            gltf.scene.scale.set(15,10,10);
-            scene.add(gltf.scene);
-        }, undefined, function (error) {
-            console.error(error);
-        });
-
-    }
-    static loadDesk(scene) {
-        const loader = new GLTFLoader();
-        loader.load('./models/desk.glb', function (gltf) {
-            console.log(gltf);
-            // gltf.setSize(100)
-             gltf.scene.scale.set(.024,.024,.024);
-             gltf.scene.rotation.x = Math.PI / 2;
-             gltf.scene.position.y = -10;
-             gltf.scene.position.z = 2;
-            scene.add(gltf.scene);
-        }, undefined, function (error) {
-            console.error(error);
-        });
-
-    }
 }
