@@ -169,7 +169,7 @@ export class Keyboard {
             ]
         ];
 
-        const self  = this;
+        const self = this;
         layout.forEach((row, rowIndex) => {
             let xOffset = -5;
             row.forEach(keyInfo => {
@@ -186,10 +186,56 @@ export class Keyboard {
                 xOffset += keyWidthWithMargin;
             });
         });
-        keyboard.position.z += 5;
+        keyboard.position.z += 3;
+        keyboard.position.y -= .5;
+        const k = this.base();
+        k.position.z += 3.5;
+        k.position.x -= 5.5;
+        k.position.y -= .2
+        keyboard.add(k);
         this.scene.add(keyboard);
     }
 
+    base() {
+        const cornerRadius = .2
+        const XStart = -5
+        const keyWidth = 11;
+        const keyHeight = 4.5
+        // Create rounded rectangle shape
+        const shape = new THREE.Shape();
+        shape.moveTo(cornerRadius, 0);
+
+        shape.lineTo(keyWidth - cornerRadius, 0);
+        shape.quadraticCurveTo(keyWidth, 0, keyWidth, cornerRadius);
+
+        shape.lineTo(keyWidth, keyHeight - cornerRadius);
+        shape.quadraticCurveTo(keyWidth, keyHeight, keyWidth - cornerRadius, keyHeight);
+        // shape.quadraticCurveTo(keyWidth,  keyHeight,  keyWidth,cornerRadius);
+
+        shape.lineTo(cornerRadius, keyHeight);
+        shape.quadraticCurveTo(0, keyHeight, 0, keyHeight - cornerRadius);
+
+        shape.lineTo(0, cornerRadius);
+        shape.quadraticCurveTo(0, 0, cornerRadius, 0);
+
+
+        // Create key geometry
+        const keyGeometry = new THREE.ExtrudeGeometry(shape, {
+            ...Keyboard.extrudeSettings,
+            depth: .3
+        });
+        // returnKey.keyGeometry = keyGeometry
+        //  keyGeometry.s
+
+        // Create key material
+        const keyMaterial = new THREE.MeshStandardMaterial({ color: 0x777777, metalness: .2 });
+
+        // Create key mesh
+        const keyMesh = new THREE.Mesh(keyGeometry, keyMaterial);
+        keyMesh.rotation.x = -Math.PI / 2; // Rotate to lay flat
+        return (keyMesh);
+
+    }
     keyDown(char) {
         const xxx = this.keyboardKeys.forEach(k => {
             if (k.char === char) {
