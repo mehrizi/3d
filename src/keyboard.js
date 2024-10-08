@@ -11,6 +11,7 @@ export class Keyboard {
         this.scene = scene;
     }
     static textDefaultColor = 0xdddddd
+    static highlightColor = 0xff
 
     static extrudeSettings = {
         steps: 1,
@@ -52,11 +53,9 @@ export class Keyboard {
         shape.lineTo(0, cornerRadius);
         shape.quadraticCurveTo(0, 0, cornerRadius, 0);
 
-
         // Create key geometry
         const keyGeometry = new THREE.ExtrudeGeometry(shape, Keyboard.extrudeSettings);
         returnKey.keyGeometry = keyGeometry
-        //  keyGeometry.s
 
         // Create key material
         const keyMaterial = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: .2 });
@@ -64,10 +63,39 @@ export class Keyboard {
         // Create key mesh
         const keyMesh = new THREE.Mesh(keyGeometry, keyMaterial);
         keyMesh.rotation.x = -Math.PI / 2; // Rotate to lay flat
+        returnKey.keyMesh = keyMesh;
         keyGroup.add(keyMesh);
 
-        returnKey.keyMesh = keyMesh;
-        returnKey.shape = shape;
+        // Create rounded rectangle shape
+        const shape2 = new THREE.Shape();
+        const outer = .01
+        shape2.moveTo(cornerRadius, 0);
+
+        shape2.lineTo(keyWidth+outer - cornerRadius, 0);
+        shape2.quadraticCurveTo(keyWidth+outer, 0, keyWidth+outer, cornerRadius);
+
+        shape2.lineTo(keyWidth+outer, keyHeight+outer - cornerRadius);
+        shape2.quadraticCurveTo(keyWidth+outer, keyHeight+outer, keyWidth+outer - cornerRadius, keyHeight+outer);
+        // shape2.quadraticCurveTo(keyWidth,  keyHeight,  keyWidth,cornerRadius);
+
+        shape2.lineTo(cornerRadius, keyHeight+outer);
+        shape2.quadraticCurveTo(0, keyHeight+outer, 0, keyHeight+outer - cornerRadius);
+
+        shape2.lineTo(0, cornerRadius);
+        shape2.quadraticCurveTo(0, 0, cornerRadius, 0);
+
+        const keyGeometry2 = new THREE.ExtrudeGeometry(shape2, {...Keyboard.extrudeSettings,depth:.11});
+
+        // Create key material
+        const keyMaterial2 = new THREE.MeshStandardMaterial({ color: 0xff0000, metalness: .2 });
+
+        // Create key mesh
+        const keyMesh2 = new THREE.Mesh(keyGeometry2, keyMaterial2);
+        keyMesh2.rotation.x = -Math.PI / 2; // Rotate to lay flat
+        keyMesh2.position.z += outer/2;
+        keyMesh2.position.x -= outer/2;
+        keyGroup.add(keyMesh2);
+
 
         // Create text for the key
         const loader = new FontLoader();
@@ -150,18 +178,18 @@ export class Keyboard {
             ],
             // Row 4
             [
-                { char: 'Shift', width: 2.25 },
+                { char: 'Shift', width: 2.5 },
                 { char: 'Z', width: 1 }, { char: 'X', width: 1 }, { char: 'C', width: 1 }, { char: 'V', width: 1 },
                 { char: 'B', width: 1 }, { char: 'N', width: 1 }, { char: 'M', width: 1 }, { char: ',', width: 1 },
                 { char: '.', width: 1 }, { char: '/', width: 1 },
-                { char: 'Shift', width: 2.75 }
+                { char: 'Shift', width: 2.9 }
             ],
             // Row 5
             [
                 { char: 'Ctrl', width: 1.25 },
                 { char: 'Win', width: 1.25 },
                 { char: 'Alt', width: 1.25 },
-                { char: 'Space', width: 6.25 },
+                { char: 'Space', width: 6.75 },
                 { char: 'Alt', width: 1.25 },
                 { char: 'Win', width: 1.25 },
                 { char: 'Menu', width: 1.75 },
@@ -197,9 +225,9 @@ export class Keyboard {
     }
 
     base() {
-        const cornerRadius = .2
+        const cornerRadius = .8
         const XStart = -5
-        const keyWidth = 11;
+        const keyWidth = 11.3;
         const keyHeight = 4.5
         // Create rounded rectangle shape
         const shape = new THREE.Shape();
@@ -239,7 +267,7 @@ export class Keyboard {
     keyDown(char) {
         const xxx = this.keyboardKeys.forEach(k => {
             if (k.char === char) {
-                k.objects.textMaterial.setValues({ color: 0x00ff00 })
+                k.objects.textMaterial.setValues({ color: 0xff0000 })
                 k.objects.group.scale.set(1, .8, 1);
 
             }
