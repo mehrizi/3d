@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader, OrbitControls } from 'three/examples/jsm/Addons.js';
-
+import { FBXLoader } from 'three/examples/jsm/Addons.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
 export class Commons {
     constructor(scene, camera) {
@@ -52,6 +53,44 @@ export class Commons {
         });
 
     }
+    loadRoom() {
+        const loader = new GLTFLoader();
+        const self = this;
+        loader.load('./models/office.glb', function (gltf) {
+            gltf.scene.scale.set(20, 15, 15);
+            gltf.scene.position.y += -.73
+            self.scene.add(gltf.scene);
+        }, undefined, function (error) {
+            console.error(error);
+        });
+
+    }
+    // loadRoom() {
+    //     const loader = new OBJLoader();
+    //     const self = this;
+    //     loader.load('./models/office.obj', function (gltf) {
+    //         console.log(gltf);
+    //         //  gltf.scale.setScalar(200);
+    //         // gltf.position.y += -.73
+    //         self.scene.add(gltf);
+    //     }, undefined, function (error) {
+    //         console.error(error);
+    //     });
+
+    // }
+    // loadRoom() {
+    //     const loader = new FBXLoader();
+    //     const self = this;
+    //     loader.load('./models/office.fbx', function (gltf) {
+    //         console.log(gltf);
+    //         //  gltf.scale.setScalar(200);
+    //         // gltf.position.y += -.73
+    //         self.scene.add(gltf);
+    //     }, undefined, function (error) {
+    //         console.error(error);
+    //     });
+
+    // }
     loadDesk() {
         const loader = new GLTFLoader();
         const self = this;

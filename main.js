@@ -8,8 +8,9 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 
 const commons = new Commons(scene, camera);
 commons.init();
-commons.loadMonitor()
-commons.loadDesk()
+// commons.loadMonitor()
+// commons.loadDesk()
+commons.loadRoom()
 //
 const keyboard = new Keyboard(scene)
 keyboard.create()
