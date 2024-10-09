@@ -70,19 +70,19 @@ export class Keyboard {
         const outer = .01
         shape2.moveTo(cornerRadius, 0);
 
-        shape2.lineTo(keyWidth+outer - cornerRadius, 0);
-        shape2.quadraticCurveTo(keyWidth+outer, 0, keyWidth+outer, cornerRadius);
+        shape2.lineTo(keyWidth + outer - cornerRadius, 0);
+        shape2.quadraticCurveTo(keyWidth + outer, 0, keyWidth + outer, cornerRadius);
 
-        shape2.lineTo(keyWidth+outer, keyHeight+outer - cornerRadius);
-        shape2.quadraticCurveTo(keyWidth+outer, keyHeight+outer, keyWidth+outer - cornerRadius, keyHeight+outer);
+        shape2.lineTo(keyWidth + outer, keyHeight + outer - cornerRadius);
+        shape2.quadraticCurveTo(keyWidth + outer, keyHeight + outer, keyWidth + outer - cornerRadius, keyHeight + outer);
 
-        shape2.lineTo(cornerRadius, keyHeight+outer);
-        shape2.quadraticCurveTo(0, keyHeight+outer, 0, keyHeight+outer - cornerRadius);
+        shape2.lineTo(cornerRadius, keyHeight + outer);
+        shape2.quadraticCurveTo(0, keyHeight + outer, 0, keyHeight + outer - cornerRadius);
 
         shape2.lineTo(0, cornerRadius);
         shape2.quadraticCurveTo(0, 0, cornerRadius, 0);
 
-        const keyGeometry2 = new THREE.ExtrudeGeometry(shape2, {...Keyboard.extrudeSettings,depth:.11});
+        const keyGeometry2 = new THREE.ExtrudeGeometry(shape2, { ...Keyboard.extrudeSettings, depth: .11 });
 
         // Create key material
         const keyMaterial2 = new THREE.MeshPhongMaterial({
@@ -93,8 +93,8 @@ export class Keyboard {
         // Create key mesh
         const keyMesh2 = new THREE.Mesh(keyGeometry2, keyMaterial2);
         keyMesh2.rotation.x = -Math.PI / 2; // Rotate to lay flat
-        keyMesh2.position.z += outer/2;
-        keyMesh2.position.x -= outer/2;
+        keyMesh2.position.z += outer / 2;
+        keyMesh2.position.x -= outer / 2;
         keyGroup.add(keyMesh2);
 
 
@@ -115,13 +115,13 @@ export class Keyboard {
             const textMesh1 = new THREE.Mesh(textGeometry1, textMaterial);
 
             // Center the text on the key
-            textMesh1.position.set(keyWidth / 3 + (keyInfo.xPlacement??0), keyHeight / 3.5, -1 * keyHeight / 2)// keyDepth / 2 + 0.01);
+            textMesh1.position.set(keyWidth / 3 + (keyInfo.xPlacement ?? 0), keyHeight / 3.5, -1 * keyHeight / 2)// keyDepth / 2 + 0.01);
             textMesh1.rotation.x = -Math.PI / 2;
             keyGroup.add(textMesh1);
             returnKey.textMesh = textMesh1;
             returnKey.textMaterial = textMaterial;
 
-            
+
         });
 
         returnKey.group = keyGroup;
@@ -178,13 +178,13 @@ export class Keyboard {
                 { char: 'Win', width: 1.25, xPlacement: -.15, keyCode: 'MetaLeft' },
                 { char: 'Alt', width: 1.25, xPlacement: -.1, keyCode: 'AltLeft' },
                 { char: ' ', width: 6.75, keyCode: 'Space' },
-                { char: 'Alt', width: 1.25, keyCode: 'AltRight' ,xPlacement:-.1},
-                { char: 'Win', width: 1.25, keyCode: 'MetaRight' ,xPlacement:-.1},
-                { char: 'Menu', width: 1.75, keyCode: 'ContextMenu' ,xPlacement:-.2},
-                { char: 'Ctrl', width: 1.75, keyCode: 'ControlRight',xPlacement:-.2 }
+                { char: 'Alt', width: 1.25, keyCode: 'AltRight', xPlacement: -.1 },
+                { char: 'Win', width: 1.25, keyCode: 'MetaRight', xPlacement: -.1 },
+                { char: 'Menu', width: 1.75, keyCode: 'ContextMenu', xPlacement: -.2 },
+                { char: 'Ctrl', width: 1.75, keyCode: 'ControlRight', xPlacement: -.2 }
             ]
         ];
-        
+
         const self = this;
         layout.forEach((row, rowIndex) => {
             let xOffset = -5;
@@ -202,13 +202,17 @@ export class Keyboard {
                 xOffset += keyWidthWithMargin;
             });
         });
-        keyboard.position.z += 3;
+
+        // adding the base
+        const baseGroup = this.base();
+        baseGroup.position.z += 3.5;
+        baseGroup.position.x -= 5.5;
+        baseGroup.position.y -= .2
+        keyboard.add(baseGroup);
+
+        // adding the keyboard
+        keyboard.position.z += 7;
         keyboard.position.y -= .5;
-        const k = this.base();
-        k.position.z += 3.5;
-        k.position.x -= 5.5;
-        k.position.y -= .2
-        keyboard.add(k);
         this.scene.add(keyboard);
     }
 
@@ -252,9 +256,9 @@ export class Keyboard {
 
     }
     keyDown(keyCode) {
-        this.keyboardKeys.forEach(k => {            
+        this.keyboardKeys.forEach(k => {
             if (k.keyInfo.keyCode === keyCode) {
-                
+
                 k.objects.textMaterial.setValues({ color: 0xff0000 })
                 k.objects.group.scale.set(1, .8, 1);
 

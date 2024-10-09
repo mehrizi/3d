@@ -16,9 +16,9 @@ export class Commons {
         document.body.appendChild(renderer.domElement);
 
 
-        this.camera.position.z = 13;
+        this.camera.position.z = 17;
         this.camera.position.x = 0;
-        this.camera.position.y = 3;
+        this.camera.position.y = 5;
 
         const controls = new OrbitControls(this.camera, renderer.domElement);
         //
@@ -44,7 +44,7 @@ export class Commons {
         const loader = new GLTFLoader();
         const self = this;
         loader.load('./models/monitor.glb', function (gltf) {
-            gltf.scene.scale.set(15, 11, 11);
+            gltf.scene.scale.set(20, 15, 15);
             gltf.scene.position.y += -.73
             self.scene.add(gltf.scene);
         }, undefined, function (error) {
@@ -58,9 +58,9 @@ export class Commons {
         loader.load('./models/desk.glb', function (gltf) {
             console.log(gltf);
             // gltf.setSize(100)
-            gltf.scene.scale.set(24, 24, 24);
+            gltf.scene.scale.set(35, 35, 35);
             // gltf.scene.rotation.x = Math.PI / 2;
-            gltf.scene.position.y = -14.4;
+            gltf.scene.position.y = -20.63;
             gltf.scene.position.z = 2;
             self.scene.add(gltf.scene);
         }, undefined, function (error) {
