@@ -1,47 +1,74 @@
-import { Screen } from './src/screen.js'
+import { Screen } from '@/screen.js';
+import { Commons } from '@/commons.js';
+import { Keyboard } from '@/keyboard.js';
+import { Player } from '@/player.js';
 import * as THREE from 'three';
-import { Commons } from './src/commons.js'
-import { Keyboard } from './src/keyboard.js';
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+class App {
+    constructor() {
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(this.renderer.domElement);
 
-const commons = new Commons(scene, camera);
-commons.init();
-// commons.loadMonitor()
-// commons.loadDesk()
-commons.loadRoom()
-//
-const keyboard = new Keyboard(scene)
-keyboard.create()
+        // Initialize commons, keyboard, screen, and player
+        this.commons = new Commons(this.scene, this.camera);
+        this.keyboard = new Keyboard(this.scene);
+        this.screen = new Screen(this.scene, this.keyboard);
+        this.player = new Player(this.scene);
 
-screen = new Screen(scene, keyboard);
-for (let i = 0; i < 24; i++) {
-  await screen.type('Hello World!');
-  screen.newLine();
+        // Bind event listeners
+        this.initEventListeners();
 
+        // Start initialization and animation loop
+        this.init();
+        this.animate();
+    }
+
+    async init() {
+        await this.commons.init();
+        // this.commons.loadRoom();
+
+        this.keyboard.create();
+
+        for (let i = 0; i < 24; i++) {
+            await this.screen.type('Hello World!');
+            this.screen.newLine();
+        }
+    }
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        this.renderer.render(this.scene, this.camera);
+        this.player.update(); // Update the animation mixer
+    }
+
+    initEventListeners() {
+        window.addEventListener('keydown', async (e) => {
+            this.keyboard.keyDown(e.code);
+
+            switch (e.key) {
+                case 'Backspace':
+                    this.screen.backspace();
+                    break;
+                case 'Enter':
+                    this.screen.newLine();
+                    setTimeout(() => this.keyboard.keyUp(e.code), 100);
+                    break;
+                case 'p': // Example to play player animation
+                    this.player.play('walking');
+                    break;
+                default:
+                    if (e.key.length === 1) await this.screen.type(e.key);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            setTimeout(() => this.keyboard.keyUp(e.code), 100);
+        });
+    }
 }
 
-window.addEventListener('keydown', async (e) => {
-  console.log(e);
-  keyboard.keyDown(e.code);
-
-  switch (e.key) {
-    case 'Backspace':
-      screen.backspace();
-      break;
-    case 'Enter':
-      screen.newLine();
-      setTimeout(()=>keyboard.keyUp(e.code),100)
-      break;
-    default:
-      if (e.key.length == 1)
-      await screen.type(e.key);
-  }
-
-})
-window.addEventListener('keyup', (e) => {
-  console.log(99,e);
-
-  setTimeout(()=>keyboard.keyUp(e.code),100);
-})
+// Initialize the app
+new App();
