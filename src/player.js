@@ -13,12 +13,13 @@ export class Player {
 
     loadModel() {
         const loader = new GLTFLoader();
-        loader.load('models/walking.glb', (gltf) => {
+        loader.load('models/mix.glb', (gltf) => {
             this.model = gltf.scene;
             this.scene.add(this.model);
 
             // Position and scale the model (adjust as needed)
             this.model.position.set(0, 0, 0);
+            this.model.rotation.set(-Math.PI / 2, 0, 0);
             this.model.scale.set(1, 1, 1);
 
             // Create AnimationMixer
@@ -38,13 +39,20 @@ export class Player {
             console.warn(`Animation "${animation}" not found.`);
             return;
         }
+        this.model.rotation.set(0, 0, 0);
 
         // Stop all currently playing actions
         this.mixer.stopAllAction();
 
-        // Play the requested animation
+        // Play the requested animation and ensure it plays only once
         const action = this.mixer.clipAction(this.animations[animation]);
-        action.reset().play();
+        action.reset()
+            .setLoop(THREE.LoopOnce, 1) // Play only once
+            .play();
+
+        // Automatically stop the action when finished
+        action.clampWhenFinished = true;
+        action.paused = false;
     }
 
     update(delta = 0.016) {

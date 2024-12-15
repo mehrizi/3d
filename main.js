@@ -47,6 +47,7 @@ class App {
     initEventListeners() {
         window.addEventListener('keydown', async (e) => {
             this.keyboard.keyDown(e.code);
+            console.log(e.key)
 
             switch (e.key) {
                 case 'Backspace':
@@ -58,6 +59,9 @@ class App {
                     break;
                 case 'p': // Example to play player animation
                     this.player.play('walking');
+                    break;
+                case ' ':
+                    this.player.play('jump-up');
                     break;
                 default:
                     if (e.key.length === 1) await this.screen.type(e.key);
