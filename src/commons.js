@@ -21,7 +21,7 @@ export class Commons {
         this.camera.position.x = 0;
         this.camera.position.y = 5;
 
-        const controls = new OrbitControls(this.camera, renderer.domElement);
+        // const controls = new OrbitControls(this.camera, renderer.domElement);
         //
         const sun = new THREE.DirectionalLight(0xffffff, 1);
         // const sun = new THREE.PointLight(0xffffff, 1,1,.5);
@@ -34,7 +34,7 @@ export class Commons {
 
         const self = this;
         function animate() {
-            controls.update();
+            // controls.update();
             renderer.render(self.scene, self.camera);
         }
         renderer.setAnimationLoop(animate);

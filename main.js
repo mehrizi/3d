@@ -16,7 +16,7 @@ class App {
         this.commons = new Commons(this.scene, this.camera);
         this.keyboard = new Keyboard(this.scene);
         this.screen = new Screen(this.scene, this.keyboard);
-        this.player = new Player(this.scene);
+        this.player = new Player(this.scene,this.camera);
 
         // Player animation mapping
         this.animationKeys = {
@@ -76,14 +76,21 @@ class App {
             }
         });
 
-        // Keyup event listener
         window.addEventListener('keyup', (e) => {
             if (this.activeKeys.has(e.key)) {
                 this.activeKeys.delete(e.key);
-
-                // Stop animation if the key corresponds to an animation
-                const animation = this.animationKeys[e.key];
-                if (animation) {
+        
+                // Check if there are other active animation keys
+                const remainingAnimations = Array.from(this.activeKeys).filter((key) =>
+                    Object.keys(this.animationKeys).includes(key)
+                );
+        
+                if (remainingAnimations.length > 0) {
+                    // Play the animation for the first remaining key (or prioritize as needed)
+                    const nextAnimation = this.animationKeys[remainingAnimations[0]];
+                    this.player.play(nextAnimation);
+                } else {
+                    // Stop animation if no relevant keys are active
                     this.player.stop();
                 }
             }
