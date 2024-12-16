@@ -3,6 +3,7 @@ import { Commons } from '@/commons.js';
 import { Keyboard } from '@/keyboard.js';
 import { Player } from '@/player.js';
 import * as THREE from 'three';
+import './style.css';
 
 class App {
     constructor() {
@@ -10,13 +11,25 @@ class App {
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(this.renderer.domElement);
 
         // Initialize commons, keyboard, screen, and player
         this.commons = new Commons(this.scene, this.camera);
         this.keyboard = new Keyboard(this.scene);
         this.screen = new Screen(this.scene, this.keyboard);
         this.player = new Player(this.scene);
+
+        // Player animation mapping
+        this.animationKeys = {
+            ArrowUp: 'walking',
+            ArrowLeft: 'turn-left',
+            ArrowRight: 'turn-right',
+            ' ': 'jumping',
+            p: 'waving',
+            o: 'opening',
+        };
+
+        // Track currently active keys
+        this.activeKeys = new Set();
 
         // Bind event listeners
         this.initEventListeners();
@@ -28,14 +41,7 @@ class App {
 
     async init() {
         await this.commons.init();
-        // this.commons.loadRoom();
-
         this.keyboard.create();
-
-        for (let i = 0; i < 24; i++) {
-            await this.screen.type('Hello World!');
-            this.screen.newLine();
-        }
     }
 
     animate() {
@@ -45,31 +51,42 @@ class App {
     }
 
     initEventListeners() {
+        // Keydown event listener
         window.addEventListener('keydown', async (e) => {
-            this.keyboard.keyDown(e.code);
-            console.log(e.key)
+            if (this.activeKeys.has(e.key)) return; // Ignore if key is already active
+            this.activeKeys.add(e.key);
 
+            // Play animation based on mapped keys
+            const animation = this.animationKeys[e.key];
+            if (animation) {
+                this.player.play(animation);
+                return; // Exit early to avoid processing further
+            }
+
+            // Handle other key actions (like screen typing)
             switch (e.key) {
                 case 'Backspace':
                     this.screen.backspace();
                     break;
                 case 'Enter':
                     this.screen.newLine();
-                    setTimeout(() => this.keyboard.keyUp(e.code), 100);
-                    break;
-                case 'p': // Example to play player animation
-                    this.player.play('walking');
-                    break;
-                case ' ':
-                    this.player.play('jump-up');
                     break;
                 default:
                     if (e.key.length === 1) await this.screen.type(e.key);
             }
         });
 
+        // Keyup event listener
         window.addEventListener('keyup', (e) => {
-            setTimeout(() => this.keyboard.keyUp(e.code), 100);
+            if (this.activeKeys.has(e.key)) {
+                this.activeKeys.delete(e.key);
+
+                // Stop animation if the key corresponds to an animation
+                const animation = this.animationKeys[e.key];
+                if (animation) {
+                    this.player.stop();
+                }
+            }
         });
     }
 }
